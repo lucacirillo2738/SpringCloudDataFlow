@@ -27,10 +27,14 @@ services:
 
       - SPRING_CLOUD_DATAFLOW_FEATURES_SCHEDULES_ENABLED=true
 
+      - SPRING_CLOUD_DATAFLOW_SCHEDULER_URL=http://dataflow-scheduler:8080
+
     restart: always
     volumes:
       - ${HOST_MOUNT_PATH:-.}:${DOCKER_MOUNT_PATH:-/home/cnb/scdf}
       - ./tasks/:/tasks/
+    depends_on:
+      - dataflow-mysql
 
   dataflow-scheduler:
     image: springcloud/dataflow-scheduler:0.0.1-SNAPSHOT
@@ -39,5 +43,7 @@ services:
       - "8080:8080"
     environment:
       - SPRING_CLOUD_DATA_FLOW_URL=http://dataflow-server:9393
-    depends_on:
-      - dataflow-server
+
+      - SPRING_DATASOURCE_URL=jdbc:h2:mem:scheduler
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=''

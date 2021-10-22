@@ -1,21 +1,23 @@
 logging:
-    level:
-        org:
-            hibernate:
-                SQL: debug
+  level:
+    org:
+      hibernate:
+        SQL: debug
 server:
-    port: 8080
+  port: 8080
 spring:
-    datasource:
-        password: ''
-        url: jdbc:h2:mem:testdb
-        username: sa
-    h2:
-        console:
-            enabled: true
-    sql:
-        init:
-            schema-locations: classpath:db/quartz_tables_h2.sql
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  h2:
+    console:
+      enabled: true
+  sql:
+    init:
+      schema-locations: classpath:db/quartz_tables_h2.sql
+
 
 scdf:
-    url: ${SPRING_CLOUD_DATA_FLOW_URL}
+  url: ${SPRING_CLOUD_DATA_FLOW_URL}
+

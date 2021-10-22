@@ -17,6 +17,7 @@ package org.springframework.cloud.dataflow.autoconfigure.model;
 
 public class SchedulerJobInfo {
 
+
     private String jobId;
     private String jobName;
     private String jobGroup;
@@ -27,6 +28,7 @@ public class SchedulerJobInfo {
     private String interfaceName;
     private Long repeatTime;
     private Boolean cronJob;
+    private String schedulerName;
 
     public String getJobId() {
         return jobId;
@@ -106,5 +108,13 @@ public class SchedulerJobInfo {
 
     public void setCronJob(Boolean cronJob) {
         this.cronJob = cronJob;
+    }
+
+    public String getSchedulerName() {
+        return schedulerName;
+    }
+
+    public void setSchedulerName(String schedulerName) {
+        this.schedulerName = schedulerName;
     }
 }

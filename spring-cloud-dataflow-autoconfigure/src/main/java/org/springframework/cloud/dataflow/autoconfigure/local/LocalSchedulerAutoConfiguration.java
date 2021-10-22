@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.autoconfigure.model.SchedulerJobInfo;
 import org.springframework.cloud.dataflow.server.config.OnLocalPlatform;
@@ -49,19 +50,29 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @Conditional({OnLocalPlatform.class, SchedulerConfiguration.SchedulerConfigurationPropertyChecker.class})
 public class LocalSchedulerAutoConfiguration {
+
+    @Value("${spring.cloud.dataflow.scheduler.url}")
+    private String schedulerUrl;
+
+    private static final String SCHEDULER_CRON_EXP_NAME = "scheduler.cron.expression";
+    private static final String SCHEDULER_TASK_DEFINITION_NAME = "scheduler.task.definition";
+
     @Bean
     @ConditionalOnMissingBean
     public Scheduler localScheduler() {
         return new Scheduler() {
             public void schedule(ScheduleRequest scheduleRequest) {
+                String cron = scheduleRequest.getSchedulerProperties().get(SCHEDULER_CRON_EXP_NAME);
+                String taskDefinition = scheduleRequest.getSchedulerProperties().get(SCHEDULER_TASK_DEFINITION_NAME);
+                String scheduleName = scheduleRequest.getScheduleName();
                 RestTemplate restTemplate = new RestTemplate();
-                ResponseEntity<String> executeResponse = restTemplate.postForEntity("http://dataflow-scheduler:8080/api/saveOrUpdate?jobName=batch-job&jobGroup=sisal&jobClass=batch-job&cronExpression=0/15 * * * * ?", null, String.class);
+                ResponseEntity<String> executeResponse = restTemplate.postForEntity(schedulerUrl + "/api/saveOrUpdate?schedulerName="+scheduleName+"&jobName="+taskDefinition+"&jobGroup=sisal&jobClass=batch-job&cronExpression=" + cron, null, String.class);
                 System.out.println(executeResponse.getBody());
             }
 
             public void unschedule(String scheduleName) {
                 RestTemplate restTemplate = new RestTemplate();
-                ResponseEntity<String> executeResponse = restTemplate.postForEntity("http://dataflow-scheduler:8080/api/deleteJob?jobName="+scheduleName+"&jobGroup=sisal&jobClass=batch-job", null, String.class);
+                ResponseEntity<String> executeResponse = restTemplate.postForEntity(schedulerUrl + "/api/deleteJob?schedulerName="+scheduleName+"&jobGroup=sisal&jobClass=batch-job", null, String.class);
             }
 
             public List<ScheduleInfo> list(String taskDefinitionName) {
@@ -71,14 +82,15 @@ public class LocalSchedulerAutoConfiguration {
             public List<ScheduleInfo> list() {
 
                 RestTemplate restTemplate = new RestTemplate();
-                ResponseEntity<SchedulerJobInfo[]> executeResponse = restTemplate.getForEntity("http://dataflow-scheduler:8080/api/getAllJobs", SchedulerJobInfo[].class);
+                ResponseEntity<SchedulerJobInfo[]> executeResponse = restTemplate.getForEntity(schedulerUrl + "/api/getAllJobs", SchedulerJobInfo[].class);
 
                 if(executeResponse != null && executeResponse.getBody() != null) {
                     return java.util.Arrays.asList(executeResponse.getBody()).stream().map(s -> {
                         ScheduleInfo scheduleInfo = new ScheduleInfo();
-                        scheduleInfo.setScheduleName(s.getJobName());
+                        scheduleInfo.setScheduleName(s.getSchedulerName());
                         scheduleInfo.setTaskDefinitionName(s.getJobName());
                         scheduleInfo.setScheduleProperties(new java.util.HashMap<>());
+
                         return scheduleInfo;
                     }).collect(Collectors.toList());
                 }else{
@@ -95,6 +107,7 @@ public class LocalSchedulerAutoConfiguration {
 
             @Override
             public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs, String platformName) {
+                taskProperties.put(SCHEDULER_TASK_DEFINITION_NAME, taskDefinitionName);
                 AppDefinition appDefinition = new AppDefinition(platformName, null);
                 ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, taskProperties, new java.util.HashMap<>(), scheduleName, resource);
                 scheduler.schedule(scheduleRequest);

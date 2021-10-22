@@ -8,6 +8,7 @@ $(function() {
             url: "/api/runJob?t=" + new Date().getTime(),
             type: "POST",
             data: {
+                "schedulerName": $("#scheduler_"+jobId).text(),
                 "jobName": $("#name_"+jobId).text(),
                 "jobGroup": $("#group_"+jobId).text()
             },
@@ -28,6 +29,7 @@ $(function() {
             url: "/api/pauseJob?t=" + new Date().getTime(),
             type: "POST",
             data: {
+                "schedulerName": $("#scheduler_"+jobId).text(),
                 "jobName": $("#name_"+jobId).text(),
                 "jobGroup": $("#group_"+jobId).text()
             },
@@ -49,6 +51,7 @@ $(function() {
             url: "/api/resumeJob?t=" + new Date().getTime(),
             type: "POST",
             data: {
+                "schedulerName": $("#scheduler_"+jobId).text(),
                 "jobName": $("#name_"+jobId).text(),
                 "jobGroup": $("#group_"+jobId).text()
             },
@@ -70,6 +73,7 @@ $(function() {
             url: "/api/deleteJob?t=" + new Date().getTime(),
             type: "POST",
             data: {
+                "schedulerName": $("#scheduler_"+jobId).text(),
                 "jobName": $("#name_"+jobId).text(),
                 "jobGroup": $("#group_"+jobId).text()
             },
@@ -90,13 +94,15 @@ $(function() {
     			$("#myModalLabel").html("cron edit");
     			var jobId = $(this).parent().data("id");
     			$("#jobId").val(jobId);
-    			$("#edit_name").val($("#name_"+jobId).text());
+                $("#edit_scheduler").val($("#scheduler_"+jobId).text());
+                $("#edit_name").val($("#name_"+jobId).text());
     			$("#edit_group").val($("#group_"+jobId).text());
     			$("#edit_cron").val($("#cron_"+jobId).text());
     			$("#edit_status").val($("#status_"+jobId).text());
     			$("#edit_desc").val($("#desc_"+jobId).text());
-    			
-    			$('#edit_name').attr("readonly","readonly"); 
+
+                $('#edit_scheduler').attr("readonly","readonly");
+                $('#edit_name').attr("readonly","readonly");
     			$('#edit_group').attr("readonly","readonly");
     			$('#edit_desc').attr("readonly","readonly");
     			
@@ -127,13 +133,15 @@ $(function() {
     			$("#myModalLabel").html("Create Job");
     			
     			$("#jobId").val("");
-    			$("#edit_name").val("");
+                $("#edit_scheduler").val("");
+                $("#edit_name").val("");
     			$("#edit_group").val("");
     			$("#edit_cron").val("");
     			$("#edit_status").val("NORMAL");
     			$("#edit_desc").val("");
-    			
-    			$('#edit_name').removeAttr("readonly");
+
+                $('#edit_scheduler').removeAttr("readonly");
+                $('#edit_name').removeAttr("readonly");
     			$('#edit_group').removeAttr("readonly");
     			$('#edit_desc').removeAttr("readonly");
     			

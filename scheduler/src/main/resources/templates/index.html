@@ -36,7 +36,8 @@
 			<thead>
 				<tr class="active">
 					<th>Id</th>
-					<th>Name</th>
+					<th>Scheduler</th>
+					<th>Task</th>
 					<th>Group</th>
 					<th>Crons</th>
 					<th>State</th>
@@ -48,6 +49,7 @@
 			<tbody  th:each="item : ${jobs}">
 				<tr th:attr="data-id=${item.jobId}">
 					<td th:text="${item.jobId}"></td>
+					<td th:id="${'scheduler_' + item.jobId}" th:text="${item.schedulerName}"></td>
 					<td th:id="${'name_' + item.jobId}" th:text="${item.jobName}"></td>
 					<td th:id="${'group_' + item.jobId}" th:text="${item.jobGroup}"></td>
 					<td th:id="${'cron_' + item.jobId}" th:text="${item.cronExpression}"></td>
@@ -81,7 +83,11 @@
 						<div>
 							<input type="hidden" class="form-control" id="jobId" name="jobId" />
 							<div class="input-group">
-								<span class="input-group-addon">Job Name</span> 
+								<span class="input-group-addon">Scheduler Name</span>
+								<input type="text" alias="no-edit" name="schedulerName" class="form-control" id="edit_scheduler" />
+							</div>
+							<div class="input-group">
+								<span class="input-group-addon">Job/Task Name</span>
 								<input type="text" alias="no-edit" name="jobName" class="form-control" id="edit_name" />
 							</div>
 							<div class="input-group">
