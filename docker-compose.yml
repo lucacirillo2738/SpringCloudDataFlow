@@ -34,6 +34,7 @@ services:
 
   dataflow-scheduler:
     image: springcloud/dataflow-scheduler:0.0.1-SNAPSHOT
+    container_name: dataflow-scheduler
     ports:
       - "8080:8080"
     environment:

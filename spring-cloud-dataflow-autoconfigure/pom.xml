@@ -10,6 +10,9 @@
     <packaging>jar</packaging>
     <name>spring-cloud-dataflow-autoconfigure-lucas</name>
     <description>Data Flow Autoconfig</description>
+    <properties>
+        <java.version>11</java.version>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
