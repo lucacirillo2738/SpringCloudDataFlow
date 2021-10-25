@@ -27,7 +27,6 @@ import org.springframework.cloud.dataflow.autoconfigure.local.LocalDataFlowServe
 import org.springframework.cloud.dataflow.autoconfigure.local.LocalSchedulerAutoConfiguration;
 import org.springframework.cloud.dataflow.server.EnableDataFlowServer;
 import org.springframework.cloud.deployer.spi.cloudfoundry.CloudFoundryDeployerAutoConfiguration;
-import org.springframework.cloud.deployer.spi.kubernetes.KubernetesAutoConfiguration;
 import org.springframework.cloud.deployer.spi.local.LocalDeployerAutoConfiguration;
 import org.springframework.cloud.task.configuration.MetricsAutoConfiguration;
 import org.springframework.context.annotation.Import;
@@ -46,8 +45,7 @@ import org.springframework.context.annotation.Import;
         SecurityAutoConfiguration.class,
         UserDetailsServiceAutoConfiguration.class,
         LocalDeployerAutoConfiguration.class,
-        CloudFoundryDeployerAutoConfiguration.class,
-        KubernetesAutoConfiguration.class
+        CloudFoundryDeployerAutoConfiguration.class
 })
 @Import({ StreamDefinitionServiceAutoConfiguration.class, LocalSchedulerAutoConfiguration.class, LocalDataFlowServerAutoConfiguration.class })
 @EnableDataFlowServer

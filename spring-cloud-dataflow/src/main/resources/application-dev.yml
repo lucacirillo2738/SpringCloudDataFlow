@@ -7,9 +7,13 @@ spring:
   cloud:
     dataflow:
       features:
+        tasks-enabled: true
         schedules-enabled: true
+        streams-enabled: false
       scheduler:
         url: http://localhost:8080
     kubernetes:
       enabled: false
+  flyway:
+    enabled: false
 

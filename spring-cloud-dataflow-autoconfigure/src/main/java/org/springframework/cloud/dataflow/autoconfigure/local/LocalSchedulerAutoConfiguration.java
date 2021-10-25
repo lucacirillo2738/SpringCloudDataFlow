@@ -15,19 +15,13 @@
  */
 package org.springframework.cloud.dataflow.autoconfigure.local;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.cloud.dataflow.autoconfigure.model.SchedulerJobInfo;
+import org.springframework.cloud.dataflow.autoconfigure.resources.QuartzResource;
 import org.springframework.cloud.dataflow.server.config.OnLocalPlatform;
 import org.springframework.cloud.dataflow.server.config.features.SchedulerConfiguration;
 import org.springframework.cloud.dataflow.server.service.SchedulerService;
@@ -35,6 +29,7 @@ import org.springframework.cloud.deployer.spi.core.AppDefinition;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleInfo;
 import org.springframework.cloud.deployer.spi.scheduler.ScheduleRequest;
 import org.springframework.cloud.deployer.spi.scheduler.Scheduler;
+import org.springframework.cloud.deployer.spi.scheduler.SchedulerPropertyKeys;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -85,11 +80,13 @@ public class LocalSchedulerAutoConfiguration {
                 ResponseEntity<SchedulerJobInfo[]> executeResponse = restTemplate.getForEntity(schedulerUrl + "/api/getAllJobs", SchedulerJobInfo[].class);
 
                 if(executeResponse != null && executeResponse.getBody() != null) {
-                    return java.util.Arrays.asList(executeResponse.getBody()).stream().map(s -> {
+                    return Arrays.asList(executeResponse.getBody()).stream().map(s -> {
+                        HashMap<String, String> props = new HashMap<>();
+                        props.put(SchedulerPropertyKeys.CRON_EXPRESSION, s.getCronExpression());
                         ScheduleInfo scheduleInfo = new ScheduleInfo();
                         scheduleInfo.setScheduleName(s.getSchedulerName());
                         scheduleInfo.setTaskDefinitionName(s.getJobName());
-                        scheduleInfo.setScheduleProperties(new java.util.HashMap<>());
+                        scheduleInfo.setScheduleProperties(props);
 
                         return scheduleInfo;
                     }).collect(Collectors.toList());
@@ -108,14 +105,14 @@ public class LocalSchedulerAutoConfiguration {
             @Override
             public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs, String platformName) {
                 taskProperties.put(SCHEDULER_TASK_DEFINITION_NAME, taskDefinitionName);
-                AppDefinition appDefinition = new AppDefinition(platformName, null);
+                AppDefinition appDefinition = new AppDefinition("local", taskProperties);
                 ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, taskProperties, new java.util.HashMap<>(), scheduleName, resource);
                 scheduler.schedule(scheduleRequest);
             }
 
             @Override
             public void schedule(String scheduleName, String taskDefinitionName, Map<String, String> taskProperties, List<String> commandLineArgs) {
-                AppDefinition appDefinition = new AppDefinition("DAFAULT", null);
+                AppDefinition appDefinition = new AppDefinition("local", taskProperties);
                 ScheduleRequest scheduleRequest = new ScheduleRequest(appDefinition, taskProperties, new java.util.HashMap<>(), scheduleName, resource);
                 scheduler.schedule(scheduleRequest);
             }
@@ -137,7 +134,7 @@ public class LocalSchedulerAutoConfiguration {
 
             @Override
             public List<ScheduleInfo> list(Pageable pageable, String taskDefinitionName, String platformName) {
-                return null;
+                return scheduler.list();
             }
 
             @Override
@@ -172,68 +169,20 @@ public class LocalSchedulerAutoConfiguration {
 
             @Override
             public ScheduleInfo getSchedule(String scheduleName, String platformName) {
-                return null;
+                List<ScheduleInfo> schedulerList = scheduler.list();
+                return schedulerList.stream().filter(s -> s.getScheduleName().equals(scheduleName)).findFirst().get();
             }
 
             @Override
             public ScheduleInfo getSchedule(String scheduleName) {
-                return null;
+                List<ScheduleInfo> schedulerList = scheduler.list();
+                return schedulerList.stream().filter(s -> s.getScheduleName().equals(scheduleName)).findFirst().get();
             }
         };
     }
 
     @Bean
-    public Resource resource(){
-        return new Resource() {
-            @Override
-            public boolean exists() {
-                return true;
-            }
-
-            @Override
-            public URL getURL() throws IOException {
-                return null;
-            }
-
-            @Override
-            public URI getURI() throws IOException {
-                return null;
-            }
-
-            @Override
-            public File getFile() throws IOException {
-                return null;
-            }
-
-            @Override
-            public long contentLength() throws IOException {
-                return 0;
-            }
-
-            @Override
-            public long lastModified() throws IOException {
-                return 0;
-            }
-
-            @Override
-            public Resource createRelative(String s) throws IOException {
-                return null;
-            }
-
-            @Override
-            public String getFilename() {
-                return null;
-            }
-
-            @Override
-            public String getDescription() {
-                return null;
-            }
-
-            @Override
-            public InputStream getInputStream() throws IOException {
-                return null;
-            }
-        };
+    public Resource resource() {
+        return new QuartzResource();
     }
 }
